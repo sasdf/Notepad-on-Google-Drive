@@ -13,6 +13,30 @@
         window.location.replace('#'+uid(8))
       }
     </script>
+    <script>
+      function Delay(func, delay){ 
+        this.func = func;
+        this.delay = delay || 1000;
+        this.handler = this.prototype._handler.bind(this)
+      }
+      Delay.prototype.clear = function(){
+        if(this.timer) clearTimeout(this.timer)
+        this.timer = null
+      }
+      Delay.prototype.postpone = function(delay){
+        this.clear()
+        delay = delay === undefined ? this.delay : delay
+        this.timer = setTimeout(this.handler, delay)
+      }
+      Delay.prototype.immediate = function(){
+        this.clear()
+        this.func()
+      }
+      Delay.prototype._handler = function(){
+        this.timer = null
+        this.func()
+      }
+    </script>
     <style>
       html{
         height: 100%;
@@ -82,67 +106,50 @@
       <textarea id="text"></textarea>
     </div>
     <script>
-      var cssTimer, subTimer
       var textCon = document.getElementById('textContainer')
       var text = document.getElementById('text')
-      var lastText, waitText
-      
-      function cssClear(){
-        if(cssTimer) clearTimeout(cssTimer)
-        cssTimer = false
-      }
-      function cssBack(){
-        cssClear()
-        cssTimer = setTimeout(function(){
-          textCon.className = 'normal'
-          textCon.csstimer = undefined
-        }, 2000)
-      }
+      var lastText
+
+      var cssDelay = new Delay(function(){ textCon.className = 'normal' }, 2000)
+      var subDelay = new Delay(sub, 1000)
       
       lastText = text.value
-      waitText = text.value
       window.onload = loadData
       window.onhashchange = loadData
-      text.onblur = startsub
-      text.onkeyup = startsub
-      setInterval(sub, 10000)
+      text.onblur = subDelay.postpone.bind(subDelay)
+      text.onkeyup = subDelay.postpone.bind(subDelay)
+      setInterval(subDelay.immediate.bind(subDelay), 10000)
+      
       function loadData(){
-        cssClear()
-        if(subTimer) clearTimeout(subTimer)
-        subTimer = false
+        cssDelay.clear()
+        subDelay.immediate()
         textCon.className = 'loading'
         var req = new XMLHttpRequest()
         req.open('GET', AppUrl + '?file=' + encodeURIComponent(window.location.hash))
         req.onload = function(){
           text.value = req.responseText
           lastText = text.value
-          waitText = text.value
-          cssBack()
           textCon.className = 'success'
+          cssDelay.postpone()
         }
         req.send()
       }
-      function startsub(){
-        if(subTimer && waitText === text.value) return
-        waitText = text.value
-        if(subTimer) clearTimeout(subTimer)
-        subTimer = setTimeout(sub, 1000)
-      }
+      
       function sub(){
-        if(subTimer) clearTimeout(subTimer)
-        subTimer = false
         if(lastText === text.value) return
         var tmp = lastText
-        cssClear()
+        cssDelay.clear()
         lastText = text.value
         textCon.className = 'saving'
         var formData = new FormData();
+        var curr = window.location.hash
         formData.append('file', window.location.hash);
         formData.append('value', text.value)
         var req = new XMLHttpRequest()
         req.open('POST', AppUrl)
         req.onload = function(){
-          cssBack()
+          if(window.location.hash !== curr) return
+          cssDelay.postpone()
           if(req.responseText === "true"){
             textCon.className = 'success'
           }else{
