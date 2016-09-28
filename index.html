@@ -63,8 +63,12 @@
       var text = document.getElementById('text')
       var lastText, waitText
       
-      function cssBack(){
+      function cssClear(){
         if(cssTimer) clearTimeout(cssTimer)
+        cssTimer = false
+      }
+      function cssBack(){
+        cssClear()
         cssTimer = setTimeout(function(){
           textCon.className = 'normal'
           textCon.csstimer = undefined
@@ -79,6 +83,9 @@
       text.onkeyup = startsub
       setInterval(sub, 10000)
       function loadData(){
+        cssClear()
+        if(subTimer) clearTimeout(subTimer)
+        subTimer = false
         textCon.className = 'loading'
         var req = new XMLHttpRequest()
         req.open('GET', AppUrl + '?file=' + encodeURIComponent(window.location.hash))
@@ -99,8 +106,10 @@
       }
       function sub(){
         if(subTimer) clearTimeout(subTimer)
-        var tmp = lastText
+        subTimer = false
         if(lastText === text.value) return
+        var tmp = lastText
+        cssClear()
         lastText = text.value
         textCon.className = 'saving'
         var formData = new FormData();
