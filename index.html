@@ -37,6 +37,24 @@
         this.func()
       }
     </script>
+    <script>
+      function DB(url){ this.url = url }
+      DB.prototype.get = function(file, func){
+        var req = new XMLHttpRequest()
+        req.open('GET', this.url + '?file=' + encodeURIComponent(file))
+        req.onload = function(){ func(req.responseText) }
+        req.send()
+      }
+      DB.prototype.set = function(file, val, func){
+        var formData = new FormData();
+        formData.append('file', file);
+        formData.append('value', val)
+        var req = new XMLHttpRequest();
+        req.open('POST', this.url)
+        req.onload = function(){ func(req.responseText) }
+        req.send(formData)
+      }
+    </script>
     <style>
       html{
         height: 100%;
@@ -106,6 +124,7 @@
       <textarea id="text"></textarea>
     </div>
     <script>
+      var db = new DB(AppUrl)
       var textCon = document.getElementById('textContainer')
       var text = document.getElementById('text')
       var lastText
@@ -124,15 +143,12 @@
         cssDelay.clear()
         subDelay.immediate()
         textCon.className = 'loading'
-        var req = new XMLHttpRequest()
-        req.open('GET', AppUrl + '?file=' + encodeURIComponent(window.location.hash))
-        req.onload = function(){
-          text.value = req.responseText
+        db.get(window.location.hash, function(res){
+          text.value = res
           lastText = text.value
           textCon.className = 'success'
           cssDelay.postpone()
-        }
-        req.send()
+        })
       }
       
       function sub(){
@@ -141,23 +157,16 @@
         cssDelay.clear()
         lastText = text.value
         textCon.className = 'saving'
-        var formData = new FormData();
-        var curr = window.location.hash
-        formData.append('file', window.location.hash);
-        formData.append('value', text.value)
-        var req = new XMLHttpRequest()
-        req.open('POST', AppUrl)
-        req.onload = function(){
+        db.set(window.location.hash, text.value, function(res){
           if(window.location.hash !== curr) return
-          cssDelay.postpone()
-          if(req.responseText === "true"){
+          if(res === "true"){
             textCon.className = 'success'
           }else{
             lastText = tmp
             textCon.className = 'error'
           }
-        }
-        req.send(formData)
+          cssDelay.postpone()
+        })
       }
     </script>
     <div id="footer">
