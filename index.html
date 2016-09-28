@@ -17,7 +17,7 @@
       function Delay(func, delay){ 
         this.func = func;
         this.delay = delay || 1000;
-        this.handler = this.prototype._handler.bind(this)
+        this.handler = this._handler.bind(this)
       }
       Delay.prototype.clear = function(){
         if(this.timer) clearTimeout(this.timer)
