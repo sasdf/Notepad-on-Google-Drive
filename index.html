@@ -109,10 +109,10 @@
       }
       Notepad.prototype.isSaved = function(){
         if(!this.file) return true;
-        return (this.lastText === this.text.value)
+        return this.lastText === this.text.value
       }
       Notepad.prototype._save = function(){
-        if(!(this.file && this.isSaved())) return;
+        if(this.isSaved()) return;
         this.forceSave()
       }
       Notepad.prototype.forceSave = function(){
