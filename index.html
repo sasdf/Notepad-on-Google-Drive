@@ -213,6 +213,7 @@
         document.title = notepad.file + ' - Notepad On Google Drive'
       }
       window.onhashchange = window.onload = function(){
+        document.title = window.location.hash.slice(1) + ' - Notepad On Google Drive'
         notepad.load(window.location.hash.slice(1))
       }
       window.addEventListener("beforeunload", function (e) {
