@@ -25,7 +25,7 @@
       }
       Delay.prototype.postpone = function(delay){
         this.clear()
-        delay = delay || this.delay
+        delay = isFinite(delay) ? delay : this.delay;
         this.timer = setTimeout(this.handler, delay)
       }
       Delay.prototype.immediate = function(){
