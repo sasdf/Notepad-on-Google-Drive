@@ -82,9 +82,12 @@
         this.text.onkeyup = this.save.bind(this)
         this.text.onblur = this.save.bind(this)
         setInterval(this.immediateSave.bind(this), 10000)
+        this.saving = false
+        this.loading = false
       }
       Notepad.prototype.load = function(file){
         var _this = this
+        this.loading = true
         this.statusDelay.clear()
         this.saveDelay.immediate()
         this.textCon.className = 'loading'
@@ -95,6 +98,7 @@
           _this.textCon.className = 'success'
           _this.statusDelay.postpone()
           if(_this.onload instanceof Function) _this.onload();
+          _this.loading = false
         })
       }
       Notepad.prototype.save = function(){
@@ -103,14 +107,18 @@
       Notepad.prototype.immediateSave = function(){
         this.saveDelay.immediate.apply(this.saveDelay, arguments)
       }
+      Notepad.prototype.isSaved = function(){
+        if(!this.file) return true;
+        return (this.lastText === this.text.value)
+      }
       Notepad.prototype._save = function(){
-        if(!this.file) return;
-        if(this.lastText === this.text.value) return;
+        if(!(this.file && this.isSaved())) return;
         this.forceSave()
       }
       Notepad.prototype.forceSave = function(){
         if(!this.file) return;
         var _this = this
+        _this.saving = true
         var tmp = _this.lastText
         _this.statusDelay.clear()
         _this.lastText = _this.text.value
@@ -126,6 +134,7 @@
           }
           _this.statusDelay.postpone()
           if(_this.onsave instanceof Function) _this.onsave();
+          _this.saving = false
         })
       }
     </script>
@@ -206,7 +215,15 @@
       window.onhashchange = window.onload = function(){
         notepad.load(window.location.hash.slice(1))
       }
-      
+      window.addEventListener("beforeunload", function (e) {
+        var msg = undefined
+        if(notepad.saving || !notepad.isSaved()){
+        msg = 'It looks like you have been editing something. \n'
+              'If you leave before saving, your changes will be lost.';
+        }
+        (e || window.event).returnValue = msg; //Gecko + IE
+        return msg; //Gecko + Webkit, Safari, Chrome etc.
+      });
     </script>
     <div id="footer">
       <a id="github" href="https://github.com/sasdf/Notepad-on-Google-Drive">
