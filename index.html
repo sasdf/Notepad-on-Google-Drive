@@ -135,7 +135,7 @@
         this.saveDelay = new Delay(_this._save.bind(_this), 1000)
         this.text.onkeyup = this.save.bind(this)
         this.text.onblur = this.save.bind(this)
-        setInterval(immediateSave, 10000)
+        setInterval(this.immediateSave, 10000)
       }
       Notepad.prototype.load = function(file){
         var _this = this
