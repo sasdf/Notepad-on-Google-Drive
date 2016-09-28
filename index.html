@@ -124,50 +124,69 @@
       <textarea id="text"></textarea>
     </div>
     <script>
-      var db = new DB(AppUrl)
-      var textCon = document.getElementById('textContainer')
-      var text = document.getElementById('text')
-      var lastText
-
-      var cssDelay = new Delay(function(){ textCon.className = 'normal' }, 2000)
-      var subDelay = new Delay(sub, 1000)
-      
-      lastText = text.value
-      window.onload = loadData
-      window.onhashchange = loadData
-      text.onblur = subDelay.postpone.bind(subDelay)
-      text.onkeyup = subDelay.postpone.bind(subDelay)
-      setInterval(subDelay.immediate.bind(subDelay), 10000)
-      
-      function loadData(){
-        cssDelay.clear()
-        subDelay.immediate()
-        textCon.className = 'loading'
-        db.get(window.location.hash, function(res){
-          text.value = res
-          lastText = text.value
-          textCon.className = 'success'
-          cssDelay.postpone()
+      function Notepad(url, node){
+        var _this = this
+        this.file = undefined
+        this.db = new DB(AppUrl)
+        this.textCon = node || document.getElementById('Notepad')
+        this.text = node.getElementsByTagName('textarea')[0]
+        this.lastText = _this.text.value
+        this.statusDelay = new Delay(function(){ _this.textCon.className = 'normal' }, 2000)
+        this.saveDelay = new Delay(_this._save.bind(_this), 1000)
+        this.text.onkeyup = this.save.bind(this)
+        this.text.onblur = this.save.bind(this)
+        setInterval(immediateSave, 10000)
+      }
+      Notepad.prototype.load = function(file){
+        var _this = this
+        this.statusDelay.clear()
+        this.saveDelay.immediate()
+        this.textCon.className = 'loading'
+        this.db.get(file, function(res){
+          _this.file = file
+          _this.text.value = res
+          _this.lastText = res
+          _this.textCon.className = 'success'
+          _this.statusDelay.postpone()
         })
       }
-      
-      function sub(){
-        if(lastText === text.value) return
-        var tmp = lastText
-        cssDelay.clear()
-        lastText = text.value
-        textCon.className = 'saving'
-        db.set(window.location.hash, text.value, function(res){
-          if(window.location.hash !== curr) return
+      Notepad.prototype.save = function(){
+        this.saveDelay.postpone.apply(this.saveDelay, arguments)
+      }
+      Notepad.prototype.immediateSave = function(){
+        this.saveDelay.immediate.apply(this.saveDelay, arguments)
+      }
+      Notepad.prototype._save = function(){
+        if(!this.file) return;
+        if(this.lastText === this.text.value) return;
+        this.forceSave()
+      }
+      Notepad.prototype.forceSave = function(){
+        if(!this.file) return;
+        var _this = this
+        var tmp = _this.lastText
+        _this.statusDelay.clear()
+        _this.lastText = _this.text.value
+        _this.textCon.className = 'saving'
+        var curr = _this.file
+        _this.db.set(_this.file, _this.text.value, function(res){
+          if(_this.file !== curr) return;
           if(res === "true"){
-            textCon.className = 'success'
+            _this.textCon.className = 'success'
           }else{
-            lastText = tmp
-            textCon.className = 'error'
+            _this.lastText = tmp
+            _this.textCon.className = 'error'
           }
-          cssDelay.postpone()
+          _this.statusDelay.postpone()
         })
       }
+      
+      var notepad = new Notepad(AppUrl, document.getElementById('textContainer'))
+
+      window.onhashchange = window.onload = function(){
+        notepad.load(window.location.hash)
+      }
+      
     </script>
     <div id="footer">
       <a id="github" href="https://github.com/sasdf/Notepad-on-Google-Drive">
