@@ -13,6 +13,20 @@
         window.location.replace('#'+uid(8))
       }
     </script>
+    
+    <!-- Google Analytics -->
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-84956580-1', 'auto');
+      ga('send', 'pageview');
+
+    </script>
+    <!-- Google Analytics end -->
+    
     <script>
       function Delay(func, delay){ 
         this.func = func;
@@ -80,6 +94,7 @@
           _this.lastText = res
           _this.textCon.className = 'success'
           _this.statusDelay.postpone()
+          if(_this.onload instanceof Function) _this.onload();
         })
       }
       Notepad.prototype.save = function(){
@@ -110,6 +125,7 @@
             _this.textCon.className = 'error'
           }
           _this.statusDelay.postpone()
+          if(_this.onsave instanceof Function) _this.onsave();
         })
       }
     </script>
@@ -184,9 +200,11 @@
     <script>
       
       var notepad = new Notepad(AppUrl, document.getElementById('notepad'))
-
+      notepad.onload = function(){
+        document.title = notepad.file + ' - Notepad On Google Drive'
+      }
       window.onhashchange = window.onload = function(){
-        notepad.load(window.location.hash)
+        notepad.load(window.location.hash.slice(1))
       }
       
     </script>
