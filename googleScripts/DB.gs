@@ -26,7 +26,9 @@ DB.prototype.val = function(name, val){
   if(val === undefined) return current[name]
   else {
     current[name] = val
-    record.setValue(JSON.stringify(current))
+    var str = JSON.stringify(current)
+    if(str.length >= 50000) return false
+    record.setValue(str)
     return true
   }
 }
