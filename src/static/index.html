@@ -1,0 +1,245 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Notepad On Google Drive</title>
+    <script>
+      var AppUrl = 'https://script.google.com/macros/s/AKfycbzusPtaiE-aQigLHVhqkCWV82VqPnUZPJ0-SxnmLZ_7c1XPpr4/exec'
+      function uid(n){
+        return Array(n).fill(0).map(function(){
+          return "abcdefghijklmnopqrstuvwxyz0123456789"[Math.floor(Math.random() * 36)]
+        }).join('')
+      }
+      if(window.location.hash === ""){
+        window.location.replace('#'+uid(8))
+      }
+    </script>
+    
+    <!-- Google Analytics -->
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+      ga('create', 'UA-84956580-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+    <!-- Google Analytics end -->
+    
+    <script>
+      function Delay(func, delay){ 
+        this.func = func;
+        this.delay = isFinite(delay) ? delay : 1000;
+        this.handler = this._handler.bind(this)
+      }
+      Delay.prototype.clear = function(){
+        if(this.timer) clearTimeout(this.timer)
+        this.timer = null
+      }
+      Delay.prototype.postpone = function(delay){
+        this.clear()
+        delay = isFinite(delay) ? delay : this.delay;
+        this.timer = setTimeout(this.handler, delay)
+      }
+      Delay.prototype.immediate = function(){
+        this.clear()
+        this.func()
+      }
+      Delay.prototype._handler = function(){
+        this.timer = null
+        this.func()
+      }
+    </script>
+    <script>
+      function DB(url){ this.url = url }
+      DB.prototype.get = function(file, func){
+        var req = new XMLHttpRequest()
+        req.open('GET', this.url + '?file=' + encodeURIComponent(file))
+        req.onload = function(){ func(req.responseText) }
+        req.send()
+      }
+      DB.prototype.set = function(file, val, func){
+        var formData = new FormData();
+        formData.append('file', file);
+        formData.append('value', val)
+        var req = new XMLHttpRequest();
+        req.open('POST', this.url)
+        req.onload = function(){ func(req.responseText) }
+        req.send(formData)
+      }
+    </script>
+    <script>
+      function Notepad(url, node){
+        var _this = this
+        this.file = undefined
+        this.db = new DB(AppUrl)
+        this.textCon = node || document.getElementById('notepad')
+        this.text = node.getElementsByClassName('editor')[0]
+        this.lastText = _this.text.value
+        this.statusDelay = new Delay(function(){ _this.textCon.className = 'normal' }, 2000)
+        this.saveDelay = new Delay(_this._save.bind(_this), 1000)
+        this.text.onkeyup = this.save.bind(this)
+        this.text.onblur = this.save.bind(this)
+        setInterval(this.save.bind(this, 500), 10000)
+        this.saving = false
+        this.loading = false
+        this.reqSave = false
+      }
+      Notepad.prototype.load = function(file){
+        var _this = this
+        this.loading = true
+        this.statusDelay.clear()
+        this.saveDelay.immediate()
+        this.textCon.className = 'loading'
+        this.db.get(file, function(res){
+          _this.file = file
+          _this.text.value = res
+          _this.lastText = res
+          _this.textCon.className = 'success'
+          _this.statusDelay.postpone()
+          if(_this.onload instanceof Function) _this.onload();
+          _this.loading = false
+        })
+      }
+      Notepad.prototype.save = function(){
+        this.saveDelay.postpone.apply(this.saveDelay, arguments)
+      }
+      Notepad.prototype.immediateSave = function(){
+        this.saveDelay.immediate.apply(this.saveDelay, arguments)
+      }
+      Notepad.prototype.isSaved = function(){
+        if(!this.file) return true;
+        return this.lastText === this.text.value
+      }
+      Notepad.prototype._save = function(){
+        if(this.isSaved()) return;
+        if(this.saving) this.reqSave = true
+        this.forceSave()
+      }
+      Notepad.prototype.forceSave = function(){
+        if(!this.file) return;
+        var _this = this
+        _this.saving = true
+        var tmp = _this.lastText
+        _this.statusDelay.clear()
+        _this.lastText = _this.text.value
+        _this.textCon.className = 'saving'
+        var curr = _this.file
+        _this.db.set(_this.file, _this.text.value, function(res){
+          if(_this.file !== curr) return;
+          if(res === "true"){
+            _this.textCon.className = 'success'
+          }else{
+            _this.lastText = tmp
+            _this.textCon.className = 'error'
+          }
+          _this.statusDelay.postpone()
+          if(_this.onsave instanceof Function) _this.onsave();
+          if(_this.reqSave){
+            _this.reqSave = false
+            setTimeout(_this.forceSave.bind(_this), 1)
+          }else{
+            _this.saving = false
+          }
+        })
+      }
+    </script>
+    <style>
+      html{
+        height: 100%;
+      }
+      body{
+        background-color: #eee;
+        text-align: center;
+        height: 100%;
+        overflow: hidden;
+        padding: 40px 10% 80px 10%;
+        box-sizing: border-box;
+        margin: 0px;
+      }
+      #footer {
+        position: absolute;
+        bottom: 24px;
+        width: 100%;
+        left: 0px;
+        height: 32px;
+        padding: 0px;
+        margin: 0px;
+        text-align: center;
+      }
+      #github{
+        text-decoration: none;
+        color: #888;
+        display: inline-block;
+        line-height: 32px;
+        font-size: 17px;
+      }
+      #github:hover{
+        color: #555;
+      }
+      #githubicon{
+        float: left;
+        margin-right: .5rem;
+      }
+      .editor{
+        border: none;
+        resize: none;
+        height: 100%;
+        width: 100%;
+        padding: .5rem;
+        box-sizing: border-box;
+        outline: none;
+      }
+      #notepad{
+        border-radius: .5rem;
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
+        padding: 1rem;
+        border: 1px solid #AAA;
+        overflow: hidden;
+        background: #fff;
+        transition: box-shadow .5s;
+      }
+      .normal { box-shadow: 0px .3rem .8rem 0px   rgba(0  ,0  ,0  ,0.5); }
+      .loading{ box-shadow: 0px .3rem 1rem  .1rem rgba(230,230,80 ,0.8); }
+      .error  { box-shadow: 0px .3rem .8rem 0px   rgba(255,0  ,0  ,0.6); }
+      .success{ box-shadow: 0px .3rem 1rem  .1rem rgba(80 ,180,80 ,1  ); }
+      .saving { box-shadow: 0px .3rem 1rem  0px   rgba(0  ,200,200,0.6); }
+    </style>
+  </head>
+  <body>
+    <div id="notepad" class="loading">
+      <textarea class="editor"></textarea>
+    </div>
+    <script>
+      
+      var notepad = new Notepad(AppUrl, document.getElementById('notepad'))
+      notepad.onload = function(){
+        document.title = notepad.file + ' - Notepad On Google Drive'
+      }
+      window.onhashchange = window.onload = function(){
+        document.title = window.location.hash.slice(1) + ' - Notepad On Google Drive'
+        notepad.load(window.location.hash.slice(1))
+      }
+      window.addEventListener("beforeunload", function (e) {
+        if(!notepad.saving && notepad.isSaved()) return undefined;
+        var msg = 'It looks like you have been editing something. \n'
+                  'If you leave before saving, your changes will be lost.';
+        (e || window.event).returnValue = msg; //Gecko + IE
+        return msg; //Gecko + Webkit, Safari, Chrome etc.
+      });
+    </script>
+    <div id="footer">
+      <a id="github" href="https://github.com/sasdf/Notepad-on-Google-Drive">
+        <div id="githubicon">
+          <svg aria-hidden="true" class="octicon octicon-mark-github" height="32" version="1.1" viewBox="0 0 16 16" width="32">
+            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z" fill="currentColor"></path>
+          </svg>
+        </div>
+        <span id="Text">
+          Notepad On Google Drive
+        </span>
+      </a>
+    </div>
+  </body>
+</html>
