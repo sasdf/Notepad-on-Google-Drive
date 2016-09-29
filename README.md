@@ -1,6 +1,6 @@
 # Notepad-on-Google-Drive
-A public notepad service inspired by notepad.cc
-Hosting on google scripts, google spreadsheet &amp; github pages
+A public notepad service inspired by notepad.cc  
+Hosting on google scripts, google spreadsheet &amp; github pages.
 
 Live Demo: https://pads.tk/
 
