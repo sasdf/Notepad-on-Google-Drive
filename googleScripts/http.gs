@@ -1,4 +1,7 @@
 function doGet(e) {
+  if(e.parameter.form){
+    return HtmlService.createHtmlOutput('<form method="POST" action="https://script.google.com/macros/s/AKfycbzusPtaiE-aQigLHVhqkCWV82VqPnUZPJ0-SxnmLZ_7c1XPpr4/dev"><input type="text" name="file"><textarea name="value"></textarea><input type="submit"></form>')
+  }
   var db = new DB('Database')
   var file = e.parameter.file;
   var res = db.val(file)
