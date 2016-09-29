@@ -14,7 +14,7 @@ DB.prototype.hash = function(name){
   var hash = Utilities.newBlob(name)
     .getBytes()
     .map(function(e){return e<0?e+256:e})
-    .reduce(function(l,e){ return (l*33+e)%2000000 }, 5381)
+    .reduce(function(l,e){ return (l<<5+l+e)%2000000 }, 5381)
   return hash + 1
 }
 
