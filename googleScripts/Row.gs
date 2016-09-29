@@ -2,7 +2,7 @@ var RowLimit = 2000000
 function Row(sheet, base) {
   var _this = this
   _this.sheet = sheet
-  _this.base = base
+  _this.base = base % RowLimit
   _this.data = []
   _this.now = -1
 }
