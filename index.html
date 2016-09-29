@@ -81,9 +81,10 @@
         this.saveDelay = new Delay(_this._save.bind(_this), 1000)
         this.text.onkeyup = this.save.bind(this)
         this.text.onblur = this.save.bind(this)
-        setInterval(this.immediateSave.bind(this), 10000)
+        setInterval(this.save.bind(this, 500), 10000)
         this.saving = false
         this.loading = false
+        this.reqSave = false
       }
       Notepad.prototype.load = function(file){
         var _this = this
@@ -113,6 +114,7 @@
       }
       Notepad.prototype._save = function(){
         if(this.isSaved()) return;
+        if(this.saving) this.reqSave = true
         this.forceSave()
       }
       Notepad.prototype.forceSave = function(){
@@ -134,7 +136,12 @@
           }
           _this.statusDelay.postpone()
           if(_this.onsave instanceof Function) _this.onsave();
-          _this.saving = false
+          if(_this.reqSave){
+            _this.reqSave = false
+            setTimeout(_this.forceSave.bind(_this), 1)
+          }else{
+            _this.saving = false
+          }
         })
       }
     </script>
