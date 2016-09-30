@@ -41,6 +41,7 @@
         this.clear()
         delay = isFinite(delay) ? delay : this.delay;
         arguments[0] = this
+        console.log(arguments)
         this.timer = setTimeout(this.handler.bind.apply(this.handler, arguments), delay)
       }
       Delay.prototype.immediate = function(){
