@@ -32,7 +32,6 @@
       function Delay(func, delay){ 
         this.func = func;
         this.delay = isFinite(delay) ? delay : 1000;
-        this.handler = this._handler.bind(this)
       }
       Delay.prototype.clear = function(){
         if(this.timer) clearTimeout(this.timer)
@@ -41,15 +40,16 @@
       Delay.prototype.postpone = function(delay){
         this.clear()
         delay = isFinite(delay) ? delay : this.delay;
-        this.timer = setTimeout(this.handler, delay)
+        arguments[0] = this
+        this.timer = setTimeout(this.handler.bind.apply(this.handler, arguments), delay)
       }
       Delay.prototype.immediate = function(){
         this.clear()
-        this.func()
+        this.func.apply(this, arguments)
       }
-      Delay.prototype._handler = function(){
+      Delay.prototype.handler = function(){
         this.timer = null
-        this.func()
+        this.func.apply(this, arguments)
       }
     </script>
     <script>
@@ -92,19 +92,20 @@
         this.loading = true
         this.text.disabled = true;
         this.statusDelay.clear()
-        this.saveDelay.immediate()
-        this.text.className = 'editor editorLoading'
-        this.textCon.className = 'loading'
-        this.db.get(file, function(res){
-          _this.file = file
-          _this.text.value = res
-          _this.lastText = res
-          _this.textCon.className = 'success'
-          _this.statusDelay.postpone()
-          _this.text.disabled = false;
-          _this.text.className = 'editor'
-          if(_this.onload instanceof Function) _this.onload();
-          _this.loading = false
+        this.saveDelay.immediate(function(){
+          this.text.className = 'editor editorLoading'
+          this.textCon.className = 'loading'
+          this.db.get(file, function(res){
+            _this.file = file
+            _this.text.value = res
+            _this.lastText = res
+            _this.textCon.className = 'success'
+            _this.statusDelay.postpone()
+            _this.text.disabled = false;
+            _this.text.className = 'editor'
+            if(_this.onload instanceof Function) _this.onload();
+            _this.loading = false
+          })
         })
       }
       Notepad.prototype.save = function(){
@@ -120,9 +121,9 @@
       Notepad.prototype._save = function(){
         if(this.isSaved()) return;
         if(this.saving) this.reqSave = true
-        this.forceSave()
+        this.forceSave.apply(this, arguments)
       }
-      Notepad.prototype.forceSave = function(){
+      Notepad.prototype.forceSave = function(cb){
         if(!this.file) return;
         var _this = this
         _this.saving = true
@@ -141,9 +142,10 @@
           }
           _this.statusDelay.postpone()
           if(_this.onsave instanceof Function) _this.onsave();
+          if(cb instanceof Function) cb();
           if(_this.reqSave){
             _this.reqSave = false
-            setTimeout(_this.forceSave.bind(_this), 1)
+            setTimeout(_this.forceSave.bind(_this, cb), 1)
           }else{
             _this.saving = false
           }
