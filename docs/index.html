@@ -93,9 +93,11 @@
         _this.text.disabled = true;
         _this.statusDelay.clear()
         _this.saveDelay.immediate(function(){
+          console.log("cb")
           _this.text.className = 'editor editorLoading'
           _this.textCon.className = 'loading'
           _this.db.get(file, function(res){
+            console.log("cbget")
             _this.file = file
             _this.text.value = res
             _this.lastText = res
