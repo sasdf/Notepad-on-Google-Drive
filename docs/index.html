@@ -89,13 +89,13 @@
       }
       Notepad.prototype.load = function(file){
         var _this = this
-        this.loading = true
-        this.text.disabled = true;
-        this.statusDelay.clear()
-        this.saveDelay.immediate(function(){
-          this.text.className = 'editor editorLoading'
-          this.textCon.className = 'loading'
-          this.db.get(file, function(res){
+        _this.loading = true
+        _this.text.disabled = true;
+        _this.statusDelay.clear()
+        _this.saveDelay.immediate(function(){
+          _this.text.className = 'editor editorLoading'
+          _this.textCon.className = 'loading'
+          _this.db.get(file, function(res){
             _this.file = file
             _this.text.value = res
             _this.lastText = res
