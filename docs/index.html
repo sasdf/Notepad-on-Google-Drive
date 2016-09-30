@@ -118,8 +118,11 @@
         if(!this.file) return true;
         return this.lastText === this.text.value
       }
-      Notepad.prototype._save = function(){
-        if(this.isSaved()) return;
+      Notepad.prototype._save = function(cb){
+        if(this.isSaved()) {
+          if(cb instanceof Function) cb()
+          return;
+        }
         if(this.saving) this.reqSave = true
         this.forceSave.apply(this, arguments)
       }
