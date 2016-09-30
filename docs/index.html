@@ -90,8 +90,10 @@
       Notepad.prototype.load = function(file){
         var _this = this
         this.loading = true
+        this.text.disabled = true;
         this.statusDelay.clear()
         this.saveDelay.immediate()
+        this.text.className = 'editor editorLoading'
         this.textCon.className = 'loading'
         this.db.get(file, function(res){
           _this.file = file
@@ -99,6 +101,8 @@
           _this.lastText = res
           _this.textCon.className = 'success'
           _this.statusDelay.postpone()
+          this.text.disabled = false;
+          this.text.className = 'editor'
           if(_this.onload instanceof Function) _this.onload();
           _this.loading = false
         })
@@ -191,6 +195,12 @@
         padding: .5rem;
         box-sizing: border-box;
         outline: none;
+        background-color: #fff;
+        transition: opacity .5s;
+        opacity: 1;
+      }
+      .editorLoading{
+        opacity: 0;
       }
       #notepad{
         border-radius: .5rem;
