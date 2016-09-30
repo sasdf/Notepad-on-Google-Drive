@@ -101,8 +101,8 @@
           _this.lastText = res
           _this.textCon.className = 'success'
           _this.statusDelay.postpone()
-          this.text.disabled = false;
-          this.text.className = 'editor'
+          _this.text.disabled = false;
+          _this.text.className = 'editor'
           if(_this.onload instanceof Function) _this.onload();
           _this.loading = false
         })
@@ -222,7 +222,7 @@
   </head>
   <body>
     <div id="notepad" class="loading">
-      <textarea class="editor"></textarea>
+      <textarea class="editor" disabled></textarea>
     </div>
     <script>
       
