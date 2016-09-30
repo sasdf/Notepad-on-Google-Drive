@@ -120,6 +120,7 @@
       }
       Notepad.prototype._save = function(cb){
         if(this.isSaved()) {
+          console.log(arguments)
           if(cb instanceof Function) cb()
           return;
         }
