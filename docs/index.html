@@ -40,8 +40,8 @@
       Delay.prototype.postpone = function(delay){
         this.clear()
         delay = isFinite(delay) ? delay : this.delay;
+        arguments = (arguments.length === 1 ? [arguments[0]] : Array.apply(null, arguments))
         arguments[0] = this
-        console.log(arguments)
         this.timer = setTimeout(this.handler.bind.apply(this.handler, arguments), delay)
       }
       Delay.prototype.immediate = function(){
@@ -94,11 +94,9 @@
         _this.text.disabled = true;
         _this.statusDelay.clear()
         _this.saveDelay.immediate(function(){
-          console.log("cb")
           _this.text.className = 'editor editorLoading'
           _this.textCon.className = 'loading'
           _this.db.get(file, function(res){
-            console.log("cbget")
             _this.file = file
             _this.text.value = res
             _this.lastText = res
@@ -123,7 +121,6 @@
       }
       Notepad.prototype._save = function(cb){
         if(this.isSaved()) {
-          console.log(arguments)
           if(cb instanceof Function) cb()
           return;
         }
