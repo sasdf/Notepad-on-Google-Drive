@@ -1,3 +1,6 @@
+---
+permalink: /404.html
+---
 <!doctype html>
 <html>
   <head>
@@ -10,8 +13,11 @@
           return "abcdefghijklmnopqrstuvwxyz0123456789"[Math.floor(Math.random() * 36)]
         }).join('')
       }
-      if(window.location.hash === ""){
-        window.location.replace('#'+uid(8))
+      if(window.location.pathname === "/"){
+        if(history.replaceState instanceof Function)
+          history.replaceState(history.state, "", "/"+uid(8))
+        else
+          location.href = '/'+uid(8)
       }
     </script>
     
@@ -208,8 +214,8 @@
         document.title = notepad.file + ' - Notepad On Google Drive'
       }
       window.onhashchange = window.onload = function(){
-        document.title = window.location.hash.slice(1) + ' - Notepad On Google Drive'
-        notepad.load(window.location.hash.slice(1))
+        document.title = window.location.pathname.slice(1) + ' - Notepad On Google Drive'
+        notepad.load(window.location.pathname.slice(1))
       }
       window.addEventListener("beforeunload", function (e) {
         if(!notepad.saving && notepad.isSaved()) return undefined;
