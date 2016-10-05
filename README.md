@@ -67,3 +67,6 @@ This Script will create an spreadsheet named `Database`. Be sure there's NO othe
         
     binarys            data
   ```
+
+# Internal details of Github Pages routing
+  Github pages has custom 404 page, so we can use it to supply our html file for every pathname. And then we can use path instead of hash tag to get file name. The disadvantage is that we'll get 404 status code. 
