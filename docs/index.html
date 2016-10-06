@@ -98,14 +98,15 @@ permalink: /404.html
         this.loading = false
         this.reqSave = false
       }
-      Notepad.prototype._get = function(file, pass, func){
-        var _this = this
-        _this.db.get(file, pass, function(res){
+      Notepad.prototype.handler = function(func){
+        return function(res){
+          var _this = this
           if(res.error === "Password wrong"){
             var npf = _this.overlay.getElementsByClassName('notepadPasswordForm')[0]
             _this.overlayForms.forEach(function(e){e.style.display='none'})
             npf.style.display='block'
             npf.onsubmit = function(e){
+              res.error = "Retry"
               npf.onsubmit = function(e){e.stopPropagation();e.preventDefault();return false;}
               e.stopPropagation()
               e.preventDefault()
@@ -113,7 +114,6 @@ permalink: /404.html
               res.pass = input.value
               input.value = ""
               _this.overlay.className = "notepadOverlay"
-              res.error = "Retry"
               if(func instanceof Function) func(res)
               return false;
             }
@@ -121,7 +121,7 @@ permalink: /404.html
           }else{
             if(func instanceof Function) func(res)
           }
-        })
+        }.bind(this)
       }
       Notepad.prototype.load = function(file, pass){
         var _this = this
@@ -131,7 +131,7 @@ permalink: /404.html
         _this.saveDelay.immediate(function(){
           _this.text.className = 'editor editorLoading'
           _this.textCon.className = 'loading'
-          _this._get(file, pass, function(res){
+          _this.db.get(file, pass, handler(function(res){
             if(!res.error){
               _this.file = file
               _this.pass = pass
@@ -150,7 +150,7 @@ permalink: /404.html
             }
             if(_this.onload instanceof Function) _this.onload(res);
             _this.loading = false
-          })
+          }))
         })
       }
       Notepad.prototype.save = function(){
@@ -180,9 +180,8 @@ permalink: /404.html
         _this.lastText = _this.text.value
         _this.textCon.className = 'saving'
         var curr = _this.file
-        _this.db.set(_this.file, _this.text.value, _this.pass, _this.meta, function(res){
+        _this.db.set(_this.file, _this.text.value, _this.pass, _this.meta, handler(function(res){
           if(_this.file !== curr) return;
-          console.log(res.error)
           if(!res.error){
             _this.textCon.className = 'success'
             _this.statusDelay.postpone()
@@ -195,6 +194,7 @@ permalink: /404.html
               _this.saving = false
             }
           }else{
+            console.log(res.error)
             _this.lastText = tmp
             _this.textCon.className = 'error'
             if(res.error === "Retry"){
@@ -203,7 +203,7 @@ permalink: /404.html
               _this.forceSave(cb)
             }
           }
-        })
+        }))
       }
     </script>
     <style>
