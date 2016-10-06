@@ -224,26 +224,59 @@ permalink: /404.html
         opacity: 0;
       }
       #notepad{
+        position: relative;
         border-radius: .5rem;
         width: 100%;
         height: 100%;
         box-sizing: border-box;
-        padding: 1rem;
+        padding: 0;
         border: 1px solid #AAA;
         overflow: hidden;
         background: #fff;
         transition: box-shadow .5s;
+      }
+      .notepadContent{
+        width: 100%;
+        height: 100%;
+        padding: 1rem;
       }
       .normal { box-shadow: 0px .3rem .8rem 0px   rgba(0  ,0  ,0  ,0.5); }
       .loading{ box-shadow: 0px .3rem 1rem  .1rem rgba(230,230,80 ,0.8); }
       .error  { box-shadow: 0px .3rem .8rem 0px   rgba(255,0  ,0  ,0.6); }
       .success{ box-shadow: 0px .3rem 1rem  .1rem rgba(80 ,180,80 ,1  ); }
       .saving { box-shadow: 0px .3rem 1rem  0px   rgba(0  ,200,200,0.6); }
+      .notepadOverlay{
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        visibility:hidden;
+        opacity:0;
+        transition:visibility 0s linear 0.5s,opacity 0.5s linear;
+      }
+      .notepadOverlayActive{
+        visibility:visible;
+        opacity:1;
+        transition-delay:0s;
+      }
+      
     </style>
   </head>
   <body>
     <div id="notepad" class="loading">
-      <textarea class="editor" disabled></textarea>
+      <div class="notepadContent">
+        <textarea class="editor" disabled></textarea>
+      </div>
+      <div class="notepadOverlay">
+        <form class="notepadPasswordForm">
+          <table style="width:100%;height:100%"><tr><td style="vertical-align:middle;text-align:center">
+          Enter password:<br />
+          <input type="password" class="notepadPassword"><br/>
+          <input type="submit"><br/>
+          </td></tr></table>
+        </form>
+      </div>
     </div>
     <script>
       
