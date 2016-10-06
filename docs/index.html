@@ -88,6 +88,16 @@ permalink: /404.html
         this.text = node.getElementsByClassName('editor')[0]
         this.overlay = node.getElementsByClassName('notepadOverlay')[0]
         this.overlayForms = Array.prototype.filter.call(this.overlay.children, function(e){e.tagName.toUpperCase() === "FORM"})
+        this.overlay.getElementsByClassName('notepadPasswordForm')[0].onsubmit = function(e){
+          e.stopPropagation()
+          e.preventDefault()
+          var input = this.getElementsByClassName('notepadPassword')[0]
+          _this.pass = input.value
+          input.value = ""
+          _this.load(_this.tmpFile, _this.pass)
+          _this.overlay.className = "notepadOverlay"
+          return false;
+        }
         this.lastText = _this.text.value
         this.statusDelay = new Delay(function(){ _this.textCon.className = 'normal' }, 2000)
         this.saveDelay = new Delay(_this._save.bind(_this), 1000)
@@ -100,6 +110,7 @@ permalink: /404.html
       }
       Notepad.prototype.load = function(file, pass){
         var _this = this
+        _this.tmpFile = file
         _this.loading = true
         _this.text.disabled = true;
         _this.statusDelay.clear()
@@ -254,6 +265,7 @@ permalink: /404.html
       .success{ box-shadow: 0px .3rem 1rem  .1rem rgba(80 ,180,80 ,1  ); }
       .saving { box-shadow: 0px .3rem 1rem  0px   rgba(0  ,200,200,0.6); }
       .notepadOverlay{
+        background-color: #eee;
         width: 100%;
         height: 100%;
         position: absolute;
