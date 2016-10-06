@@ -131,7 +131,7 @@ permalink: /404.html
         _this.saveDelay.immediate(function(){
           _this.text.className = 'editor editorLoading'
           _this.textCon.className = 'loading'
-          _this.db.get(file, pass, handler(function(res){
+          _this.db.get(file, pass, _this.handler(function(res){
             if(!res.error){
               _this.file = file
               _this.pass = pass
@@ -180,7 +180,7 @@ permalink: /404.html
         _this.lastText = _this.text.value
         _this.textCon.className = 'saving'
         var curr = _this.file
-        _this.db.set(_this.file, _this.text.value, _this.pass, _this.meta, handler(function(res){
+        _this.db.set(_this.file, _this.text.value, _this.pass, _this.meta, _this.handler(function(res){
           if(_this.file !== curr) return;
           if(!res.error){
             _this.textCon.className = 'success'
