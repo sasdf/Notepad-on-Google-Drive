@@ -120,9 +120,9 @@ permalink: /404.html
               _this.text.className = 'editor'
             }else{
               if(res.error == "Password wrong"){
-                this.overlayForms.forEach(function(e){e.style.display='none'})
-                this.overlay.getElementsByClassName('notepadPasswordForm')[0].style.display='block'
-                this.overlay.className = "notepadOverlay notepadOverlayActive"
+                _this.overlayForms.forEach(function(e){e.style.display='none'})
+                _this.overlay.getElementsByClassName('notepadPasswordForm')[0].style.display='block'
+                _this.overlay.className = "notepadOverlay notepadOverlayActive"
               }
               _this.textCon.className = 'error'
             }
