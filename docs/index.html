@@ -182,7 +182,7 @@ permalink: /404.html
         var curr = _this.file
         _this.db.set(_this.file, _this.text.value, _this.pass, _this.meta, function(res){
           if(_this.file !== curr) return;
-          console.log(error)
+          console.log(res.error)
           if(!res.error){
             _this.textCon.className = 'success'
             _this.statusDelay.postpone()
