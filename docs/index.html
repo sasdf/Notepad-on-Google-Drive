@@ -106,6 +106,7 @@ permalink: /404.html
             _this.overlayForms.forEach(function(e){e.style.display='none'})
             npf.style.display='block'
             npf.onsubmit = function(e){
+              npf.onsubmit = function(e){e.stopPropagation();e.preventDefault();return false;}
               e.stopPropagation()
               e.preventDefault()
               var input = this.getElementsByClassName('notepadPassword')[0]
@@ -130,7 +131,7 @@ permalink: /404.html
         _this.saveDelay.immediate(function(){
           _this.text.className = 'editor editorLoading'
           _this.textCon.className = 'loading'
-          _this.db.get(file, pass, function(res){
+          _this._get(file, pass, function(res){
             if(!res.error){
               _this.file = file
               _this.pass = pass
@@ -181,6 +182,7 @@ permalink: /404.html
         var curr = _this.file
         _this.db.set(_this.file, _this.text.value, _this.pass, _this.meta, function(res){
           if(_this.file !== curr) return;
+          console.log(error)
           if(!res.error){
             _this.textCon.className = 'success'
             _this.statusDelay.postpone()
