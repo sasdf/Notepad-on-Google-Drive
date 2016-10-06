@@ -145,7 +145,7 @@ permalink: /404.html
             }else{
               _this.textCon.className = 'error'
               if(res.error === "Retry"){
-                load(res.file || file, res.pass || pass)
+                _this.load(res.file || file, res.pass || pass)
               }
             }
             if(_this.onload instanceof Function) _this.onload(res);
