@@ -232,7 +232,16 @@ permalink: /404.html
       .control{
         display: inline-block;
         margin: 0 1rem;
-        color: #999;
+        color: #888;
+      }
+      .controlEnable{
+        color: #7b7;
+      }
+      .control:hover{
+        color: #555;
+      }
+      .control:active{
+        color: #333;
       }
       #footer {
         position: absolute;
@@ -318,7 +327,7 @@ permalink: /404.html
   <body>
     <div id="header">
       <div id="control-save" class="control"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="20px" height="20px" viewBox="0 0 459 459" xml:space="preserve"><path d="M357,0H51C22.95,0,0,22.95,0,51v357c0,28.05,22.95,51,51,51h357c28.05,0,51-22.95,51-51V102L357,0z M229.5,408    c-43.35,0-76.5-33.15-76.5-76.5s33.15-76.5,76.5-76.5c43.35,0,76.5,33.15,76.5,76.5S272.85,408,229.5,408z M306,153H51V51h255V153    z" fill="currentColor"/></svg></div>
-      <div id="control-sync" class="control"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="20px" height="20px" viewBox="0 0 408 408" xml:space="preserve"><path d="M0,204c0,56.1,22.95,107.1,61.2,142.8L0,408h153V255l-56.1,56.1C68.85,285.6,51,247.35,51,204    c0-66.3,43.35-122.4,102-145.35v-51C66.3,30.6,0,109.65,0,204z M408,0H255v153l56.1-56.1C339.15,122.4,357,160.65,357,204    c0,66.3-43.35,122.4-102,145.35V402.9c86.7-22.95,153-102,153-196.351c0-56.1-22.95-107.1-61.2-142.8L408,0z" fill="currentColor"/></svg></div>
+      <div id="control-sync" class="control controlEnable"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="20px" height="20px" viewBox="0 0 408 408" xml:space="preserve"><path d="M0,204c0,56.1,22.95,107.1,61.2,142.8L0,408h153V255l-56.1,56.1C68.85,285.6,51,247.35,51,204    c0-66.3,43.35-122.4,102-145.35v-51C66.3,30.6,0,109.65,0,204z M408,0H255v153l56.1-56.1C339.15,122.4,357,160.65,357,204    c0,66.3-43.35,122.4-102,145.35V402.9c86.7-22.95,153-102,153-196.351c0-56.1-22.95-107.1-61.2-142.8L408,0z" fill="currentColor"/></svg></div>
       <div id="control-lock" class="control"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="20px" height="20px" viewBox="0 0 535.5 535.5" xml:space="preserve"><path d="M420.75,178.5h-25.5v-51c0-71.4-56.1-127.5-127.5-127.5c-71.4,0-127.5,56.1-127.5,127.5v51h-25.5c-28.05,0-51,22.95-51,51    v255c0,28.05,22.95,51,51,51h306c28.05,0,51-22.95,51-51v-255C471.75,201.45,448.8,178.5,420.75,178.5z M267.75,408    c-28.05,0-51-22.95-51-51s22.95-51,51-51s51,22.95,51,51S295.8,408,267.75,408z M346.8,178.5H188.7v-51    c0-43.35,35.7-79.05,79.05-79.05c43.35,0,79.05,35.7,79.05,79.05V178.5z" fill="currentColor"/></svg></div>
     </div>
     <div id="notepad" class="loading">
@@ -340,10 +349,12 @@ permalink: /404.html
       var notepad = new Notepad(AppUrl, document.getElementById('notepad'))
       notepad.onload = function(){
         document.title = notepad.file + ' - Notepad On Google Drive'
+        if(notepad.pass) document.getElementById('control-lock').className="control controlEnable"
       }
       window.onhashchange = window.onload = function(){
         document.title = window.location.pathname.slice(1) + ' - Notepad On Google Drive'
         notepad.load(window.location.pathname.slice(1))
+        document.getElementById('control-lock').className="control"
       }
       window.addEventListener("beforeunload", function (e) {
         if(!notepad.saving && notepad.isSaved()) return undefined;
