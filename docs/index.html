@@ -116,6 +116,8 @@ permalink: /404.html
               _this.statusDelay.postpone()
               _this.text.disabled = false;
               _this.text.className = 'editor'
+            }else{
+              _this.textCon.className = 'error'
             }
             if(_this.onload instanceof Function) _this.onload(res);
             _this.loading = false
