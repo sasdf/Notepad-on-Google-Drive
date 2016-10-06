@@ -67,10 +67,11 @@ permalink: /404.html
         req.onload = function(){ func(JSON.parse(req.responseText)) }
         req.send()
       }
-      DB.prototype.set = function(file, val, pass, meta, func){
+      DB.prototype.set = function(file, val, pass, newPass, meta, func){
         var formData = new FormData();
         formData.append('file', file);
         formData.append('content', val);
+        if(newPass) formData.append('setPass', newPass);
         if(pass) formData.append('pass', pass);
         if(meta) formData.append('meta', meta);
         var req = new XMLHttpRequest();
@@ -180,7 +181,7 @@ permalink: /404.html
         _this.lastText = _this.text.value
         _this.textCon.className = 'saving'
         var curr = _this.file
-        _this.db.set(_this.file, _this.text.value, _this.pass, _this.meta, _this.handler(function(res){
+        _this.db.set(_this.file, _this.text.value, _this.pass, null, null, _this.handler(function(res){
           if(_this.file !== curr) return;
           if(!res.error){
             _this.textCon.className = 'success'
