@@ -151,7 +151,7 @@ permalink: /404.html
         var curr = _this.file
         _this.db.set(_this.file, _this.text.value, _this.pass, _this.meta, function(res){
           if(_this.file !== curr) return;
-          if(res === "true"){
+          if(!res.error){
             _this.textCon.className = 'success'
           }else{
             _this.lastText = tmp
