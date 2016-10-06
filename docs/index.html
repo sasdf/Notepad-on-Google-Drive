@@ -64,7 +64,7 @@ permalink: /404.html
       DB.prototype.get = function(file, pass, func){
         var req = new XMLHttpRequest()
         req.open('GET', this.url + '?file=' + encodeURIComponent(file) + '&pass=' + encodeURIComponent(pass))
-        req.onload = function(){ func(req.responseText) }
+        req.onload = function(){ func(JSON.parse(req.responseText)) }
         req.send()
       }
       DB.prototype.set = function(file, val, pass, meta, func){
@@ -75,7 +75,7 @@ permalink: /404.html
         if(meta) formData.append('meta', meta);
         var req = new XMLHttpRequest();
         req.open('POST', this.url)
-        req.onload = function(){ func(req.responseText) }
+        req.onload = function(){ func(JSON.parse(req.responseText)) }
         req.send(formData)
       }
     </script>
@@ -88,16 +88,6 @@ permalink: /404.html
         this.text = node.getElementsByClassName('editor')[0]
         this.overlay = node.getElementsByClassName('notepadOverlay')[0]
         this.overlayForms = Array.prototype.filter.call(this.overlay.children, function(e){e.tagName.toUpperCase() === "FORM"})
-        this.overlay.getElementsByClassName('notepadPasswordForm')[0].onsubmit = function(e){
-          e.stopPropagation()
-          e.preventDefault()
-          var input = this.getElementsByClassName('notepadPassword')[0]
-          _this.pass = input.value
-          input.value = ""
-          _this.load(_this.tmpFile, _this.pass)
-          _this.overlay.className = "notepadOverlay"
-          return false;
-        }
         this.lastText = _this.text.value
         this.statusDelay = new Delay(function(){ _this.textCon.className = 'normal' }, 2000)
         this.saveDelay = new Delay(_this._save.bind(_this), 1000)
@@ -108,9 +98,32 @@ permalink: /404.html
         this.loading = false
         this.reqSave = false
       }
+      Notepad.prototype._get = function(file, pass, func){
+        var _this = this
+        _this.db.get(file, pass, function(res){
+          if(res.error === "Password wrong"){
+            var npf = _this.overlay.getElementsByClassName('notepadPasswordForm')[0]
+            _this.overlayForms.forEach(function(e){e.style.display='none'})
+            npf.style.display='block'
+            npf.onsubmit = function(e){
+              e.stopPropagation()
+              e.preventDefault()
+              var input = this.getElementsByClassName('notepadPassword')[0]
+              res.pass = input.value
+              input.value = ""
+              _this.overlay.className = "notepadOverlay"
+              res.error = "Retry"
+              if(func instanceof Function) func(res)
+              return false;
+            }
+            _this.overlay.className = "notepadOverlay notepadOverlayActive"
+          }else{
+            if(func instanceof Function) func(res)
+          }
+        })
+      }
       Notepad.prototype.load = function(file, pass){
         var _this = this
-        _this.tmpFile = file
         _this.loading = true
         _this.text.disabled = true;
         _this.statusDelay.clear()
@@ -118,7 +131,6 @@ permalink: /404.html
           _this.text.className = 'editor editorLoading'
           _this.textCon.className = 'loading'
           _this.db.get(file, pass, function(res){
-            res = JSON.parse(res)
             if(!res.error){
               _this.file = file
               _this.pass = pass
@@ -130,12 +142,10 @@ permalink: /404.html
               _this.text.disabled = false;
               _this.text.className = 'editor'
             }else{
-              if(res.error == "Password wrong"){
-                _this.overlayForms.forEach(function(e){e.style.display='none'})
-                _this.overlay.getElementsByClassName('notepadPasswordForm')[0].style.display='block'
-                _this.overlay.className = "notepadOverlay notepadOverlayActive"
-              }
               _this.textCon.className = 'error'
+              if(res.error === "Retry"){
+                load(res.file || file, res.pass || pass)
+              }
             }
             if(_this.onload instanceof Function) _this.onload(res);
             _this.loading = false
@@ -173,18 +183,23 @@ permalink: /404.html
           if(_this.file !== curr) return;
           if(!res.error){
             _this.textCon.className = 'success'
+            _this.statusDelay.postpone()
+            if(_this.onsave instanceof Function) _this.onsave();
+            if(cb instanceof Function) cb();
+            if(_this.reqSave){
+              _this.reqSave = false
+              setTimeout(_this.forceSave.bind(_this, cb), 1)
+            }else{
+              _this.saving = false
+            }
           }else{
             _this.lastText = tmp
             _this.textCon.className = 'error'
-          }
-          _this.statusDelay.postpone()
-          if(_this.onsave instanceof Function) _this.onsave();
-          if(cb instanceof Function) cb();
-          if(_this.reqSave){
-            _this.reqSave = false
-            setTimeout(_this.forceSave.bind(_this, cb), 1)
-          }else{
-            _this.saving = false
+            if(res.error === "Retry"){
+              _this.file = res.file || _this.file
+              _this.pass = res.pass || _this.pass
+              _this.forceSave(cb)
+            }
           }
         })
       }
