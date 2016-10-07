@@ -70,10 +70,10 @@ permalink: /404.html
       DB.prototype.set = function(file, val, pass, newPass, meta, func){
         var formData = new FormData();
         formData.append('file', file);
-        if(val) formData.append('content', val);
-        if(newPass) formData.append('setPass', newPass);
-        if(pass) formData.append('pass', pass);
-        if(meta) formData.append('meta', meta);
+        if(val !== undefined && val !== null) formData.append('content', val);
+        if(newPass !== undefined && newPass !== null) formData.append('setPass', newPass);
+        if(pass !== undefined && pass !== null) formData.append('pass', pass);
+        if(meta !== undefined && meta !== null) formData.append('meta', meta);
         var req = new XMLHttpRequest();
         req.open('POST', this.url)
         req.onload = function(){ func(JSON.parse(req.responseText)) }
