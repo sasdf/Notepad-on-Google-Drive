@@ -70,7 +70,7 @@ permalink: /404.html
       DB.prototype.set = function(file, val, pass, newPass, meta, func){
         var formData = new FormData();
         formData.append('file', file);
-        formData.append('content', val);
+        if(val) formData.append('content', val);
         if(newPass) formData.append('setPass', newPass);
         if(pass) formData.append('pass', pass);
         if(meta) formData.append('meta', meta);
@@ -97,7 +97,7 @@ permalink: /404.html
         setInterval(this.save.bind(this, 500), 10000)
         this.saving = false
         this.loading = false
-        this.reqSave = false
+        this.reqSave = []
       }
       Notepad.prototype.handler = function(func){
         return function(res){
@@ -169,8 +169,52 @@ permalink: /404.html
           if(cb instanceof Function) cb()
           return;
         }
-        if(this.saving) this.reqSave = true
+        if(this.saving) return this.reqSave.push(cb)
         this.forceSave.apply(this, arguments)
+      }
+      Notepad.prototype.chpasswd = function(cb){
+        var _this = this
+        var npf = _this.overlay.getElementsByClassName('notepadNewPasswordForm')[0]
+        _this.overlayForms.forEach(function(e){e.style.display='none'})
+        npf.style.display='block'
+        npf.onsubmit = function(e){
+          npf.onsubmit = function(e){e.stopPropagation();e.preventDefault();return false;}
+          e.stopPropagation()
+          e.preventDefault()
+          var input = this.getElementsByClassName('notepadNewPassword')[0]
+          var pass = input.value
+          _this.setPasswd(pass, function(){
+            res.pass = pass
+            if(cb instanceof Function) cb()
+          })
+          input.value = ""
+          _this.overlay.className = "notepadOverlay"
+          return false;
+        }
+        _this.overlay.className = "notepadOverlay notepadOverlayActive"
+      }
+      Notepad.prototype.setPasswd = function(passwd, cb){
+        if(!this.file) return;
+        var _this = this
+        _this.statusDelay.clear()
+        _this.textCon.className = 'saving'
+        var curr = _this.file
+        _this.db.set(_this.file, null, _this.pass, passwd, null, _this.handler(function(res){
+          if(_this.file !== curr) return;
+          if(!res.error){
+            _this.textCon.className = 'success'
+            _this.statusDelay.postpone()
+            if(cb instanceof Function) cb();
+          }else{
+            _this.textCon.className = 'error'
+            if(res.error === "Retry"){
+              _this.file = res.file || _this.file
+              _this.pass = res.pass || _this.pass
+              passwd = res.passwd || passwd
+              _this.setPasswd(passwd, cb)
+            }
+          }
+        }))
       }
       Notepad.prototype.forceSave = function(cb){
         if(!this.file) return;
@@ -188,9 +232,12 @@ permalink: /404.html
             _this.statusDelay.postpone()
             if(_this.onsave instanceof Function) _this.onsave();
             if(cb instanceof Function) cb();
-            if(_this.reqSave){
-              _this.reqSave = false
-              setTimeout(_this.forceSave.bind(_this, cb), 1)
+            else if(cb instanceof Array){
+              cb.forEach(function(e){if(e instanceof Function) e();})
+            }
+            if(_this.reqSave.length){
+              setTimeout(_this.forceSave.bind(_this, _this.reqSave), 1)
+              _this.reqSave = []
             }else{
               _this.saving = false
             }
@@ -339,6 +386,11 @@ permalink: /404.html
           <form class="notepadPasswordForm" onsubmit="return false;">
             Enter password:<br />
             <input type="password" class="notepadPassword"><br/>
+            <input type="submit"><br/>
+          </form>
+          <form class="notepadNewPasswordForm" onsubmit="return false;">
+            Enter your new password:<br />
+            <input type="password" class="notepadNewPassword"><br/>
             <input type="submit"><br/>
           </form>
         </td></tr></table>
