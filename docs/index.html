@@ -424,6 +424,15 @@ permalink: /404.html
         (e || window.event).returnValue = msg; //Gecko + IE
         return msg; //Gecko + Webkit, Safari, Chrome etc.
       });
+      document.getElementById('control-save').onclick = function(e){
+        notepad.immediateSave();
+      }
+      document.getElementById('control-lock').onclick = function(e){
+        notepad.chpasswd(function(){
+          if(notepad.pass) document.getElementById('control-lock').className="control controlEnable"
+          else document.getElementById('control-lock').className="control"
+        });
+      }
     </script>
     <div id="footer">
       <a id="github" href="https://github.com/sasdf/Notepad-on-Google-Drive">
