@@ -175,6 +175,8 @@ permalink: /404.html
       }
       Notepad.prototype.chpasswd = function(cb){
         var _this = this
+        if(_this.changingPasswd) return
+        _this.changingPasswd = true
         var npf = _this.overlay.getElementsByClassName('notepadNewPasswordForm')[0]
         _this.overlayForms.forEach(function(e){e.style.display='none'})
         npf.style.display='block'
@@ -186,6 +188,7 @@ permalink: /404.html
           var pass = input.value
           _this.setPasswd(pass, function(){
             _this.pass = pass
+            _this.changingPasswd = false
             if(cb instanceof Function) cb()
           })
           input.value = ""
