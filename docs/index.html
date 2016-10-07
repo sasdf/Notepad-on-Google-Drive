@@ -185,7 +185,7 @@ permalink: /404.html
           var input = this.getElementsByClassName('notepadNewPassword')[0]
           var pass = input.value
           _this.setPasswd(pass, function(){
-            res.pass = pass
+            _this.pass = pass
             if(cb instanceof Function) cb()
           })
           input.value = ""
@@ -385,12 +385,17 @@ permalink: /404.html
       <div class="notepadOverlay">
         <table style="width:100%;height:100%"><tr><td style="vertical-align:middle;text-align:center">
           <form class="notepadForm notepadPasswordForm" onsubmit="return false;">
-            Enter password:<br />
+            <div class="notepadFormLabel">
+              Enter password:
+            </div>
             <input type="password" class="notepadPassword"><br/>
             <input type="submit"><br/>
           </form>
           <form class="notepadForm notepadNewPasswordForm" onsubmit="return false;">
-            Enter your new password:<br />
+            <div class="notepadFormLabel">
+              Enter your new password:<br />
+              (Left empty if you want to disable password)
+            </div>
             <input type="password" class="notepadNewPassword"><br/>
             <input type="submit"><br/>
           </form>
