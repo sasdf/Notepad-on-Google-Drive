@@ -88,7 +88,7 @@ permalink: /404.html
         this.textCon = node || document.getElementById('notepad')
         this.text = node.getElementsByClassName('editor')[0]
         this.overlay = node.getElementsByClassName('notepadOverlay')[0]
-        this.overlayForms = Array.prototype.filter.call(this.overlay.children, function(e){e.tagName.toUpperCase() === "FORM"})
+        this.overlayForms = Array.prototype.filter.call(this.overlay.children, function(e){return e.tagName.toUpperCase() === "FORM"})
         this.lastText = _this.text.value
         this.statusDelay = new Delay(function(){ _this.textCon.className = 'normal' }, 2000)
         this.saveDelay = new Delay(_this._save.bind(_this), 1000)
